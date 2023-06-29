@@ -19,6 +19,11 @@ from torchmoji.global_variables import PRETRAINED_PATH, VOCAB_PATH
 
 OUTPUT_PATH = 'test_sentences.csv'
 
+import os
+base_dir = os.path.join(os.path.expanduser('~'),'projects/torchMoji')
+VOCAB_PATH = os.path.join(base_dir,'model','vocabulary.json') #'{}/model/vocabulary.json'.format(ROOT_PATH)
+PRETRAINED_PATH = os.path.join(base_dir,'model/pytorch_model.bin') #'{}/model/pytorch_model.bin'.format(ROOT_PATH)
+
 TEST_SENTENCES = ['I love mom\'s cooking',
                   'I love how you never reply back..',
                   'I love cruising with my homies',
@@ -27,13 +32,13 @@ TEST_SENTENCES = ['I love mom\'s cooking',
                   'This is shit',
                   'This is the shit']
 
-
+TEST_SENTENCES = ['a close up of two bowls of fine food on a table', 'a pan of onions along side a pan of stew containing delicious meat.', 'amazing food starts with delicious meat in a pan filled with sliced onions']
+TEST_SENTENCES.extend(['A hungry crowd is standing around in front of some wine bottles.', 'Insane crowd impatiently waiting for their drinks', 'many stupid people line up to taste some wine'])
 def top_elements(array, k):
     ind = np.argpartition(array, -k)[-k:]
     return ind[np.argsort(array[ind])][::-1]
 
 maxlen = 30
-
 print('Tokenizing using dictionary from {}'.format(VOCAB_PATH))
 with open(VOCAB_PATH, 'r') as f:
     vocabulary = json.load(f)
@@ -53,6 +58,8 @@ for prob in [prob]:
     # at the root of the torchMoji repo.
     print('Writing results to {}'.format(OUTPUT_PATH))
     scores = []
+    neg_scores = []
+    pos_scores = []
     for i, t in enumerate(TEST_SENTENCES):
         t_tokens = tokenized[i]
         t_score = [t]
@@ -63,6 +70,9 @@ for prob in [prob]:
         t_score.extend([t_prob[ind] for ind in ind_top])
         scores.append(t_score)
         print(t_score)
+
+        neg_scores.append(prob[i][35])
+        pos_scores.append(prob[i][53])
 
     with open(OUTPUT_PATH, 'w') as csvfile:
         writer = csv.writer(csvfile, delimiter=str(','), lineterminator='\n')
